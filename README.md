@@ -1,17 +1,28 @@
-# Ironman2 — JARVIS Starter
+# Ironman2 — JARVIS Voice Assistant
 
-A futuristic browser-based JARVIS dashboard starter.
+A browser-based, voice-first JARVIS starter with a secure server-side AI endpoint.
 
-## Run it
-1. Open [index.html](./index.html) in a modern browser.
-2. Try the demo commands: `hello`, `time`, and `help`.
-3. Use Chrome for the optional browser speech-recognition demo and allow microphone access when prompted.
+## Features
+- Futuristic responsive dashboard
+- Browser speech recognition (where supported)
+- Spoken replies using browser speech synthesis
+- Local demo commands: hello, time, date, help, stop speaking
+- Optional AI chat through a server endpoint
+- API key stays on the server, never in browser code
 
-## Current features
-- Animated reactor-style dashboard
-- Live clock
-- Text command demo
-- Optional browser voice input
+## Run locally
+1. Install Node.js 20 or newer.
+2. In this repository, move `index.html` into a folder named `public`.
+3. Run `npm install`.
+4. Set `OPENAI_API_KEY` in your server environment (do not commit it).
+5. Optionally set `OPENAI_MODEL` (default: `gpt-6.2-astra`).
+6. Run `npm start` and open `http://localhost:3000`.
 
-## Not connected yet
-This is a front-end demo. It does not yet connect to an AI model or control your device. To add real AI chat, create a secure backend and keep API keys on the server—never put secret keys in browser code.
+## Deploy
+Deploy this Node.js app to a host that supports server-side environment variables. Set `OPENAI_API_KEY` in the host's secret settings. Do not publish it in frontend code or GitHub.
+
+## Current limitations
+This starter provides AI conversation and browser voice input/output. It does not yet connect Gmail, Calendar, device controls, or arbitrary computer actions. Those require separate integrations, user authorization, and confirmation rules. Voice recognition support varies by browser and usually requires HTTPS or localhost.
+
+## Security
+Never commit `.env`, API keys, passwords, or access tokens. External actions must be implemented with scoped permissions and explicit confirmation.
