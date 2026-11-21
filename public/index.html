@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#050b18">
+<title>J.A.R.V.I.S. — Personal AI Assistant</title>
+<style>
+:root{color-scheme:dark;--cyan:#54eaff;--muted:#8ba6bd;--panel:#071525e8}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% 20%,#102c48 0,#071426 48%,#030812 100%);color:#eaf8ff;font:16px/1.5 system-ui,sans-serif;padding:24px}
+main{width:min(920px,100%);margin:auto;text-align:center}.eyebrow{letter-spacing:.3em;color:var(--cyan);font-size:.72rem}.title{font-size:clamp(2.4rem,8vw,4.8rem);letter-spacing:.14em;margin:.15em 0;text-shadow:0 0 24px #27cfff66}
+.reactor{width:clamp(130px,28vw,210px);aspect-ratio:1;margin:20px auto;border-radius:50%;display:grid;place-items:center;border:2px solid #54eaff88;box-shadow:0 0 25px #25dfff55,inset 0 0 35px #25dfff33;position:relative;animation:pulse 3s ease-in-out infinite}
+.reactor:before,.reactor:after{content:"";position:absolute;inset:12%;border:1px solid #54eaff88;border-radius:50%;transform:rotateX(65deg);animation:spin 9s linear infinite}.reactor:after{inset:23%;transform:rotateY(65deg);animation-direction:reverse;animation-duration:7s}
+.core{width:30%;aspect-ratio:1;border-radius:50%;background:#b8f8ff;box-shadow:0 0 18px 8px #32dfff,0 0 65px 22px #1aaeff88}
+@keyframes spin{to{rotate:360deg}}@keyframes pulse{50%{box-shadow:0 0 45px #25dfff99,inset 0 0 55px #25dfff55}}
+.panel{margin:18px auto;padding:22px;border:1px solid #54eaff44;border-radius:18px;background:var(--panel);box-shadow:0 12px 50px #0006;text-align:left}
+#clock{color:var(--cyan);font-variant-numeric:tabular-nums;text-align:center;font-size:1.2rem}.status{text-align:center;color:var(--muted);font-size:.85rem;margin:4px 0 18px}
+#messages{height:260px;overflow:auto;padding:12px;background:#020a14;border:1px solid #315a75;border-radius:12px;margin-bottom:14px}
+.msg{padding:10px 12px;margin:8px 0;border-radius:10px;white-space:pre-wrap;overflow-wrap:anywhere}.user{background:#10374c;margin-left:12%}.assistant{background:#102235;margin-right:12%}.system{color:#9cb5c8;font-size:.85rem;text-align:center}
+form{display:flex;gap:10px}input{min-width:0;flex:1;background:#020a14;border:1px solid #315a75;border-radius:10px;padding:14px;color:white;font:inherit}
+button{border:1px solid var(--cyan);background:#0a3348;color:#eafaff;border-radius:10px;padding:12px 16px;font:inherit;cursor:pointer}button:hover{background:#10516b}button:disabled{opacity:.5;cursor:not-allowed}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}.note{font-size:.8rem;color:#7893a8;text-align:center;margin-top:18px}
+@media(max-width:540px){body{padding:14px}form{flex-direction:column}.user{margin-left:4%}.assistant{margin-right:4%}}
+</style>
+</head>
+<body><main>
+<div class="eyebrow">PERSONAL ASSISTANT SYSTEM</div><h1 class="title">J.A.R.V.I.S.</h1>
+<div class="reactor" aria-label="Animated reactor"><div class="core"></div></div>
+<section class="panel">
+<div id="clock">--:--:--</div><div class="status" id="status">STARTING • LOCAL VOICE MODE</div>
+<div id="messages" aria-live="polite"><div class="msg assistant">Hello. I'm JARVIS. You can type or use the microphone. Connect the secure backend to enable AI chat.</div></div>
+<form id="chat-form"><input id="prompt" autocomplete="off" placeholder="Ask JARVIS anything..." aria-label="Message"><button id="send" type="submit">Send</button></form>
+<div class="controls"><button id="mic" type="button">🎙 Start listening</button><button id="speak" type="button">🔊 Voice replies: on</button><button id="clear" type="button">Clear chat</button></div>
+</section>
+<p class="note">Voice recognition depends on browser support and microphone permission. AI needs the backend and a server-side API key. JARVIS asks before any external or sensitive action.</p>
+</main>
+<script>
+const $=s=>document.querySelector(s), messages=$('#messages'), status=$('#status');
+function clock(){ $('#clock').textContent=new Date().toLocaleString(); } clock(); setInterval(clock,1000);
+let voiceReplies=true, recognition=null, listening=false;
+function add(text,who='assistant'){const el=document.createElement('div');el.className='msg '+who;el.textContent=text;messages.append(el);messages.scrollTop=messages.scrollHeight;}
+function say(text){if(!voiceReplies||!('speechSynthesis'in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.rate=1;u.pitch=1; speechSynthesis.speak(u);}
+function localCommand(text){const t=text.toLowerCase().trim();if(['hello','hi','hey jarvis'].includes(t))return "Hello! I'm online. What can I help you with?";
+if(t==='help'||t.includes('what can you do'))return "I can chat when the AI backend is connected. Locally, try: time, date, help, or stop speaking.";
+if(t.includes('time'))return 'The time is '+new Date().toLocaleTimeString()+'.';
+if(t.includes('date'))return 'Today is '+new Date().toLocaleDateString()+'.';
+if(t==='stop speaking'||t==='be quiet'){speechSynthesis.cancel();return 'Voice output stopped.';}return null;}
+async function send(text){if(!text.trim())return;add(text,'user');$('#prompt').value='';const local=localCommand(text);if(local){add(local);say(local);return;}
+$('#send').disabled=true;status.textContent='THINKING…';try{const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text})});const data=await res.json();if(!res.ok)throw new Error(data.error||'AI service unavailable');const answer=data.reply||'I did not receive a reply.';add(answer);say(answer);}catch(e){const msg=e.message.includes('Failed to fetch')?'AI backend is not running yet. Start the server and configure OPENAI_API_KEY.':e.message;add(msg);say(msg);}finally{$('#send').disabled=false;status.textContent='READY • VOICE + CHAT';}}
+$('#chat-form').addEventListener('submit',e=>{e.preventDefault();send($('#prompt').value);});
+$('#speak').addEventListener('click',()=>{voiceReplies=!voiceReplies;$('#speak').textContent='🔊 Voice replies: '+(voiceReplies?'on':'off');if(!voiceReplies)speechSynthesis.cancel();});
+$('#clear').addEventListener('click',()=>{messages.replaceChildren();speechSynthesis.cancel();});
+$('#mic').addEventListener('click',()=>{const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){add('Speech recognition is not supported here. Try Chrome.','system');return;}if(listening){recognition.stop();return;}recognition=new SR();recognition.lang='en-IN';recognition.interimResults=false;recognition.onstart=()=>{listening=true;$('#mic').textContent='■ Stop listening';status.textContent='LISTENING…';};recognition.onend=()=>{listening=false;$('#mic').textContent='🎙 Start listening';status.textContent='READY';};recognition.onerror=()=>add('Microphone error. Check browser permission.','system');recognition.onresult=e=>send(e.results[0][0].transcript);recognition.start();});
+</script></body></html>
