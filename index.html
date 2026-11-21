@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#050b18">
+<title>JARVIS • Personal Assistant</title>
+<style>
+:root{color-scheme:dark;--cyan:#54eaff;--muted:#8ba6bd}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% 35%,#102c48 0,#071426 42%,#030812 100%);color:#eaf8ff;font:16px/1.5 system-ui,sans-serif;display:grid;place-items:center;padding:24px}
+main{width:min(900px,100%);text-align:center}.eyebrow{letter-spacing:.35em;color:var(--cyan);font-size:.75rem}.title{font-size:clamp(2.4rem,8vw,5rem);letter-spacing:.16em;margin:.25em 0;text-shadow:0 0 24px #27cfff66}
+.reactor{width:min(250px,62vw);aspect-ratio:1;margin:28px auto;border-radius:50%;display:grid;place-items:center;border:2px solid #54eaff88;box-shadow:0 0 25px #25dfff55,inset 0 0 35px #25dfff33;position:relative;animation:pulse 3s ease-in-out infinite}
+.reactor:before,.reactor:after{content:"";position:absolute;inset:12%;border:1px solid #54eaff88;border-radius:50%;transform:rotateX(65deg) rotate(0deg);animation:spin 9s linear infinite}.reactor:after{inset:23%;transform:rotateY(65deg);animation-direction:reverse;animation-duration:7s}
+.core{width:30%;aspect-ratio:1;border-radius:50%;background:#b8f8ff;box-shadow:0 0 18px 8px #32dfff,0 0 65px 22px #1aaeff88}
+@keyframes spin{to{rotate:360deg}}@keyframes pulse{50%{box-shadow:0 0 45px #25dfff99,inset 0 0 55px #25dfff55}}
+.panel{max-width:680px;margin:0 auto;padding:22px;border:1px solid #54eaff44;border-radius:18px;background:#071525cc;box-shadow:0 12px 50px #0006}
+#clock{color:var(--cyan);font-variant-numeric:tabular-nums;font-size:1.25rem}.status{color:var(--muted);margin:8px 0 18px}
+form{display:flex;gap:10px}input{min-width:0;flex:1;background:#020a14;border:1px solid #315a75;border-radius:10px;padding:14px;color:white;font:inherit}button{border:1px solid var(--cyan);background:#0a3348;color:#eafaff;border-radius:10px;padding:12px 18px;font:inherit;cursor:pointer}button:hover{background:#10516b}
+#reply{min-height:30px;margin:18px 0 0;color:#b9efff}.note{font-size:.8rem;color:#7893a8;margin-top:22px}
+@media(max-width:480px){form{flex-direction:column}}
+</style>
+</head>
+<body>
+<main>
+  <div class="eyebrow">PERSONAL ASSISTANT SYSTEM</div>
+  <h1 class="title">J.A.R.V.I.S.</h1>
+  <div class="reactor" aria-label="Animated reactor"><div class="core"></div></div>
+  <section class="panel">
+    <div id="clock">--:--:--</div>
+    <div class="status">SYSTEM ONLINE • LOCAL DEMO MODE</div>
+    <form id="command-form">
+      <input id="command" autocomplete="off" placeholder="Type a command..." aria-label="Your command">
+      <button type="submit">Run command</button>
+    </form>
+    <p id="reply" role="status">Hello. I am JARVIS. Try “hello”, “time”, or “help”.</p>
+    <button id="voice" type="button">Start voice input</button>
+  </section>
+  <p class="note">This is a browser-based starter demo. AI answers and device controls are not connected yet.</p>
+</main>
+<script>
+const clock=document.querySelector('#clock');
+function tick(){clock.textContent=new Date().toLocaleTimeString();}
+tick();setInterval(tick,1000);
+const reply=document.querySelector('#reply');
+function runCommand(raw){
+ const cmd=raw.trim().toLowerCase();
+ if(!cmd){reply.textContent='Please type a command first.';return;}
+ if(cmd==='hello'||cmd==='hi') reply.textContent='Hello! JARVIS is ready. What would you like to do?';
+ else if(cmd.includes('time')) reply.textContent='The current time is '+new Date().toLocaleTimeString()+'.';
+ else if(cmd==='help') reply.textContent='Available demo commands: hello, time, help. More features can be added next.';
+ else reply.textContent='I heard: "'+raw+'". AI chat is not connected in this demo yet.';
+}
+document.querySelector('#command-form').addEventListener('submit',e=>{e.preventDefault();runCommand(document.querySelector('#command').value);});
+document.querySelector('#voice').addEventListener('click',()=>{
+ const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!SpeechRecognition){reply.textContent='Voice input is not supported by this browser. Try Chrome.';return;}
+ const recognition=new SpeechRecognition();recognition.lang='en-US';recognition.onresult=e=>{const said=e.results[0][0].transcript;document.querySelector('#command').value=said;runCommand(said);};recognition.onerror=()=>reply.textContent='Voice input could not start. Check microphone permission.';recognition.start();
+});
+</script>
+</body>
+</html>
