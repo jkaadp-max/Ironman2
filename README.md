@@ -2,6 +2,19 @@
 
 JARVIS is a voice-first assistant with a Node.js AI backend and an Android-compatible web app.
 
+## Deploy the AI backend (Android-only setup)
+
+1. Open the [one-click Render deployment page](https://render.com/deploy?repo=https://github.com/jkaadp-max/Ironman2).
+2. Sign in to Render and connect your GitHub account if asked.
+3. Review the service named `jarvis-ai-backend`. Choose the Free plan if available.
+4. When prompted for `OPENAI_API_KEY`, paste your secret key directly into Render's secret field. Never put it in GitHub, this README, or the Android app.
+5. Create the service and wait for deployment to finish.
+6. Copy the service's HTTPS URL (it will look like `https://jarvis-ai-backend.onrender.com`).
+7. Open JARVIS on Android → Connection settings → paste that URL → Save.
+8. Send JARVIS a test message such as "Hello, who are you?"
+
+The Render blueprint sets `OPENAI_MODEL=gpt-6.2-sol` by default. You can change this in Render's Environment settings if your API project has access to another model. The OpenAI API is billed separately from a ChatGPT subscription. Free hosting availability and limits may change; a free service can sleep when idle.
+
 ## Current features
 - Responsive JARVIS dashboard
 - Browser speech recognition (where supported) and spoken replies
@@ -11,20 +24,19 @@ JARVIS is a voice-first assistant with a Node.js AI backend and an Android-compa
 - Capacitor Android wrapper and GitHub Actions debug APK build
 - API keys stay on the server
 
-## Run the server
+## Run the server manually
 1. Install Node.js 20 or newer.
 2. Run `npm install`.
 3. Set `OPENAI_API_KEY` in your server environment. Never commit it.
 4. Optionally set `OPENAI_MODEL` to a model available to your API account.
 5. Run `npm start`.
 
-## Deploy the backend
-Deploy this Node.js app to a host that supports environment variables. Configure:
-- `OPENAI_API_KEY` — secret API key
-- `OPENAI_MODEL` — optional model override
+## Server configuration
+- `OPENAI_API_KEY` — secret API key (required)
+- `OPENAI_MODEL` — model ID; defaults to `gpt-6.2-astra` unless the hosting blueprint overrides it
 - `CORS_ORIGINS` — optional comma-separated list of trusted web origins
 
-The Capacitor Android origin is allowed by the server. In the Android app, open Connection settings and enter the HTTPS URL of your deployed backend.
+The Capacitor Android origin is allowed by the server.
 
 ## Build the Android APK without a PC
 1. Push changes to the `main` branch or open the Actions tab in GitHub.
