@@ -1,54 +1,52 @@
-# Ironman2 — JARVIS Assistant
+# Ironman2 — JARVIS Work Assistant
 
-JARVIS is a voice-first assistant with a Node.js AI backend and an Android-compatible web app.
+JARVIS is a voice-first assistant with a Node.js AI backend and Android-compatible app.
 
-## Deploy the AI backend (Android-only setup)
+## Deploy the cloud AI (Android-only)
 
-1. Open the [one-click Render deployment page](https://render.com/deploy?repo=https://github.com/jkaadp-max/Ironman2).
-2. Sign in to Render and connect your GitHub account if asked.
-3. Review the service named `jarvis-ai-backend`. Choose the Free plan if available.
-4. When prompted for `OPENAI_API_KEY`, paste your secret key directly into Render's secret field. Never put it in GitHub, this README, or the Android app.
-5. Create the service and wait for deployment to finish.
-6. Copy the service's HTTPS URL (it will look like `https://jarvis-ai-backend.onrender.com`).
-7. Open JARVIS on Android → Connection settings → paste that URL → Save.
-8. Send JARVIS a test message such as "Hello, who are you?"
+1. Open the [Render deploy page](https://render.com/deploy?repo=https://github.com/jkaadp-max/Ironman2).
+2. Sign in to Render and connect GitHub.
+3. Review the `jarvis-ai-backend` service and create it.
+4. In Render → JARVIS service → Environment, add `GEMINI_API_KEY` as a secret and paste your Google AI Studio key. Never put the key in GitHub or the Android app.
+5. Set `AI_PROVIDER` to `gemini` and `GEMINI_MODEL` to a model enabled for your key (default `gemini-2.5-flash`).
+6. Wait for deployment. Copy the service's HTTPS URL.
+7. In JARVIS on Android → Connection settings, paste the backend URL and Save.
+8. Test: “Hello JARVIS, what work can you help me automate?”
 
-The Render blueprint sets `OPENAI_MODEL=gpt-6.2-sol` by default. You can change this in Render's Environment settings if your API project has access to another model. The OpenAI API is billed separately from a ChatGPT subscription. Free hosting availability and limits may change; a free service can sleep when idle.
+The backend supports Gemini and OpenAI. Gemini is selected by default when `GEMINI_API_KEY` is present, unless `AI_PROVIDER` overrides it. API usage may be billed or quota-limited by Google; ChatGPT subscription does not include API credits.
 
-## Current features
-- Responsive JARVIS dashboard
-- Browser speech recognition (where supported) and spoken replies
-- AI chat through a server-side OpenAI API endpoint
-- Backend URL setting for the packaged Android app
-- Installable PWA shell with basic offline caching
-- Capacitor Android wrapper and GitHub Actions debug APK build
-- API keys stay on the server
+## Features in this first version
+- Responsive JARVIS dashboard and voice interface
+- Server-side AI chat with Gemini or OpenAI
+- Android backend URL setting
+- PWA shell and Capacitor Android wrapper
+- GitHub Actions debug APK build
+- API keys remain on the cloud server
 
-## Run the server manually
-1. Install Node.js 20 or newer.
-2. Run `npm install`.
-3. Set `OPENAI_API_KEY` in your server environment. Never commit it.
-4. Optionally set `OPENAI_MODEL` to a model available to your API account.
-5. Run `npm start`.
+## Manual server setup
+Requires Node.js 20+.
 
-## Server configuration
-- `OPENAI_API_KEY` — secret API key (required)
-- `OPENAI_MODEL` — model ID; defaults to `gpt-6.2-astra` unless the hosting blueprint overrides it
-- `CORS_ORIGINS` — optional comma-separated list of trusted web origins
+```sh
+npm install
+GEMINI_API_KEY=your_key AI_PROVIDER=gemini npm start
+```
 
-The Capacitor Android origin is allowed by the server.
+## Environment variables
+- `AI_PROVIDER` — `gemini` or `openai` (optional; defaults to Gemini when its key is set)
+- `GEMINI_API_KEY` — secret Gemini API key
+- `GEMINI_MODEL` — default `gemini-2.5-flash`
+- `OPENAI_API_KEY` — optional OpenAI secret
+- `OPENAI_MODEL` — OpenAI model ID
+- `CORS_ORIGINS` — optional comma-separated trusted web origins
 
-## Build the Android APK without a PC
-1. Push changes to the `main` branch or open the Actions tab in GitHub.
-2. Run **Build JARVIS Android APK** manually with **Run workflow**, if it has not started automatically.
-3. Wait for the workflow to finish.
-4. Open its completed run and download the `jarvis-debug-apk` artifact.
-5. Extract the ZIP and install `app-debug.apk` on your Android device. Android may ask you to allow installation from that source.
+## Build APK on Android
+1. Open the repository's Actions tab.
+2. Run **Build JARVIS Android APK** or wait for a push-triggered build.
+3. Download the `jarvis-debug-apk` artifact from a successful run.
+4. Extract and install `app-debug.apk`.
 
-The APK is a debug build for testing. A signed release APK/AAB and Play Store publication require a signing key and additional setup.
-
-## Current limitations
-This is the first Android-compatible build. It provides AI chat and voice UI, not unrestricted phone control. Gmail, Calendar, business workflows, notifications, and Android actions need separate integrations and permissions. JARVIS must ask before sending messages, spending money, deleting data, or taking other sensitive actions.
+## Automation limits and safety
+This build supports AI conversation, drafting and planning. It does not yet automatically access Gmail, Calendar, contacts, local files or other apps. Those require separate authorized integrations and workflow modules. JARVIS should request confirmation before sending messages, spending money, deleting data, or making other consequential changes.
 
 ## Security
-Never commit API keys, passwords, access tokens, or `.env` files. Configure secrets in your hosting provider. Do not place the OpenAI API key in Android or browser code.
+Never commit API keys, passwords, access tokens, or `.env` files. Configure secrets in Render. Do not put provider keys in Android/browser code.
